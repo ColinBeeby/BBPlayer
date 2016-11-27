@@ -42,7 +42,9 @@ class PlaylistController(object):
                     audio = eyed3.load(join(path, trackFile))
                     trackDict = self._createTrackDict(audio.tag, join(path, trackFile))
                     filesInDir.append(trackDict)
-            self.playlist = self.playlist + filesInDir
+            if filesInDir:
+                filesInDir = sorted(filesInDir, key=lambda k: k['TrackNumber'])
+                self.playlist = self.playlist + filesInDir
             
         return len(self.playlist)
     
@@ -56,14 +58,10 @@ class PlaylistController(object):
             }
         return trackDict
             
-    def getCurrentTrack(self):
-        if self.playlist and self.currentItemIndex < len(self.playlist):
-            track = self.playlist[self.currentItemIndex]
-            self.currentItemIndex += 1
-            return track
-        return None
-    
     def getNextTrack(self):
+        '''
+        Get the next track to be played
+        '''
         if self.playlist and self.nextTrackIndex < len(self.playlist):
             track = self.playlist[self.nextTrackIndex]
             self.nextTrackIndex += 1
