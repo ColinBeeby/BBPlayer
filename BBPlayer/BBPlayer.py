@@ -5,13 +5,12 @@ Created on 20 Nov 2016
 @author: colin
 '''
 from os import listdir
-from os.path import isdir, isfile, join
+from os.path import isdir, join
 
 from Tkinter import *
 
 from MplayerController import MplayerController
 from PlaylistController import PlaylistController
-import tkFileDialog
 import tkFont
 
 class GUIInterfaceController(object):
@@ -20,9 +19,9 @@ class GUIInterfaceController(object):
     '''
     
     MUSIC_PATH = '/home/colin/Music/'
-    INFO_FRAME_HEIGHT = 50
-    MAIN_FRAME_HEIGHT = 200
-    FOOTER_FRAME_HEIGHT = 50
+    INFO_FRAME_HEIGHT = 75
+    FOOTER_FRAME_HEIGHT = 75
+    FONT_SIZE = 30
     
     def __init__(self):
         '''
@@ -34,16 +33,12 @@ class GUIInterfaceController(object):
     
         self.root = Tk()
         
-        self.customFont = tkFont.Font(family="Helvetica", size=12)
+        self.customFont = tkFont.Font(family="Helvetica", size=self.FONT_SIZE)
         
         self.root.title('BBPlayer')
-        #self._fullScreen()
-        self.root.geometry("500x500") #take this out for production
-        #self._hideTitleBar() PUT THIS BACK IN FOR PRODUCTION
-        
-        #Label(text='Hello World!!', font=self.customFont).pack()
-        #Button(self.root, text='Play', command=self.play).pack()
-        #Button(self.root, text='Stop', command=self.stop).pack()
+        self._fullScreen()
+        #self.root.geometry("500x500") #take this out for production
+        self._hideTitleBar()
         
         #Set up the info frame
         self._addInfoFrame(self.INFO_FRAME_HEIGHT)
@@ -76,35 +71,37 @@ class GUIInterfaceController(object):
         self.controlsFrame = Frame(self.mainFrame, bg="yellow")
         self.controlsFrame.pack_propagate(0)
         self.controlsFrame.pack(side=TOP, fill=BOTH, expand=1)
-        self.pauseButton = Button(self.controlsFrame, text='Play/Pause', height=5, command=self.pause)
-        self.pauseButton.pack(side=TOP, fill=X)
-        self.nextButton = Button(self.controlsFrame, text='Next', command=self.next)
-        self.nextButton.pack(side=LEFT)
-        self.addButton = Button(self.controlsFrame, text='Add', command=lambda: self.showFilesFrame())
-        self.addButton.pack()
+        self.pauseButton = Button(self.controlsFrame, text='Play/Pause', command=self.pause, font=self.customFont, bg="green")
+        self.pauseButton.pack(side=LEFT, fill=BOTH, expand=1)
+        self.nextButton = Button(self.controlsFrame, text='Next', command=self.next, font=self.customFont, width=20, bg="yellow")
+        self.nextButton.pack(side=RIGHT, fill=BOTH)
+        
         
     def _addFilesFrame(self):
         self.filesFrame = Frame(self.mainFrame)
         self.filesFrame.pack_propagate(0)
-        self.artistListBox = Listbox(self.filesFrame, selectmode=SINGLE)
+        self.artistListBox = Listbox(self.filesFrame, selectmode=SINGLE, font=self.customFont, width=10)
         self.artistListBox.bind('<<ListboxSelect>>', self.onArtistSelect)
-        self.artistListBox.pack()
+        self.artistListBox.pack(side=LEFT, fill=BOTH)
         self.artistList = []
-        self.albumListBox = Listbox(self.filesFrame, selectmode=SINGLE)
+        self.albumListBox = Listbox(self.filesFrame, selectmode=SINGLE, font=self.customFont)
         self.albumListBox.bind('<<ListboxSelect>>', self.onAlbumSelect)
-        self.albumListBox.pack()
+        self.albumListBox.pack(side=RIGHT, fill=BOTH, expand=1)
         self.albumList = []
         self._getArtists()
-        self.controlsButton = Button(self.filesFrame, text="< Back", command=lambda: self.showControlsFrame())
-        self.controlsButton.pack()
+        
         
         
     def _addFooterFrame(self, frameHeight):
         self.footerFrame = Frame(self.root, height=frameHeight, bg="green")
         self.footerFrame.pack_propagate(0)
         self.footerFrame.pack(side=BOTTOM, fill=X)
-        self.quitButton = Button(self.footerFrame, text='Quit', width=30, command=self.quit)
-        self.quitButton.pack(fill=BOTH, expand=1)
+        self.controlsButton = Button(self.footerFrame, text="< Back", width=10, command=lambda: self.showControlsFrame(), font=self.customFont, bg="cyan3")
+        #self.controlsButton.pack(side=RIGHT, fill=BOTH)
+        self.addButton = Button(self.footerFrame, text='Add', width=10, command=lambda: self.showFilesFrame(), font=self.customFont, bg="cyan3")
+        self.addButton.pack(side=RIGHT, fill=BOTH)
+        self.quitButton = Button(self.footerFrame, text='Quit', command=self.quit, font=self.customFont)
+        self.quitButton.pack(side=LEFT, fill=BOTH, expand=1)
         
         
     def _fullScreen(self):
@@ -183,17 +180,24 @@ class GUIInterfaceController(object):
     def showFilesFrame(self):
         self.controlsFrame.pack_forget()
         self.filesFrame.pack(side=TOP, fill=BOTH, expand=1)
+        #This is bad design - this method is doing two different things!!
+        self.addButton.pack_forget()   #pack(side=RIGHT, fill=BOTH)
+        self.controlsButton.pack(side=RIGHT, fill=BOTH)
         
     def showControlsFrame(self):
         self.filesFrame.pack_forget()
         self.controlsFrame.pack(side=TOP, fill=BOTH, expand=1)
+        #This is bad design - this method is doing two different things!!
+        self.controlsButton.pack_forget()
+        self.addButton.pack(side=RIGHT, fill=BOTH)
         
     def _playNextTrack(self):
-        self.playListLength -= 1
-        self._updatePlayListLengthEntry()
-        self.nextTrack = self.playlist.getNextTrack()
-        if not self.nextTrack == None:
-            self.play()
+        if self.playListLength > 0 :
+            self.playListLength -= 1
+            self._updatePlayListLengthEntry()
+            self.nextTrack = self.playlist.getNextTrack()
+            if not self.nextTrack == None:
+                self.play()
         
     
 

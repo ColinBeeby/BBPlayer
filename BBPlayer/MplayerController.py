@@ -7,7 +7,8 @@ Created on 18 Nov 2016
 import thread
 import time
 
-from mplayer import Player
+#from mplayer import Player
+from core import Player 
 
 class MplayerController(object):
     '''
